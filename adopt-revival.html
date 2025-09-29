@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Adopt a School for Revival</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f9f9fb;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #012169;
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    main h2 {
+      color: #012169;
+      margin-bottom: 10px;
+    }
+
+    main p {
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .school-highlight {
+      background: #fff0f0;
+      border-left: 4px solid #012169;
+      padding: 15px 20px;
+      margin-bottom: 25px;
+      border-radius: 6px;
+    }
+
+    .choice-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .choice-buttons button {
+      flex: 1;
+      min-width: 150px;
+      padding: 12px;
+      font-size: 1rem;
+      background: #012169;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .choice-buttons button:hover {
+      background: #0b2a8f;
+    }
+
+    .choice-buttons button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .modal {
+  display: none;  /* Keep this ONLY */
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+    .modal-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #012169;
+    }
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .modal-content button {
+      background: #012169;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background: #0b2a8f;
+    }
+
+    .close {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #aaa;
+    }
+
+    .close:hover {
+      color: #000;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 16px;
+      background: #eee;
+      color: #333;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Adopt a School for Revival</h1>
+  </header>
+
+  <main>
+    <div class="school-highlight">
+      <h2 id="schoolName">Loading School...</h2>
+      <p id="schoolLocation"></p>
+    </div>
+
+    <p id="description">
+      Help bring revival to this school by committing to outreach efforts, hosting events,
+      and gathering students to worship and encounter Christ.
+      Choose whether you’re adopting as a church, individual, or group.
+    </p>
+
+    <div class="choice-buttons">
+      <button id="churchBtn" onclick="openModal('church')">Church</button>
+      <button id="individualBtn" onclick="openModal('individual')">Individual</button>
+      <button id="groupBtn" onclick="openModal('group')">Group</button>
+    </div>
+
+    <a class="back-button" href="map.html">← Back to Map</a>
+  </main>
+
+  <!-- Modal -->
+  <div id="registrationModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3 id="modalTitle">Register</h3>
+      <form id="registrationForm">
+        <input type="text" id="fullName" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="date" id="dob" required>
+        <select id="referral" required>
+          <option value="">How did you hear about us?</option>
+          <option value="social">Social Media</option>
+          <option value="church">Church</option>
+          <option value="friend">Friend</option>
+          <option value="event">Event</option>
+        </select>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Utilities
+    function getQueryParams() {
+      const params = {};
+      const queryString = window.location.search.substring(1);
+      queryString.split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+      });
+      return params;
+    }
+
+    function calculateAge(dobString) {
+      const dob = new Date(dobString);
+      const ageDiff = Date.now() - dob.getTime();
+      const ageDate = new Date(ageDiff);
+      return Math.abs(ageDate.getUTCFullYear() - 1970);
+    }
+
+    // Init
+    const { city, index } = getQueryParams();
+    const schoolData = JSON.parse(localStorage.getItem('cityChildren') || '{}');
+    const school = schoolData?.[city]?.[index];
+
+    const nameEl = document.getElementById('schoolName');
+    const locationEl = document.getElementById('schoolLocation');
+    const descEl = document.getElementById('description');
+    const modal = document.getElementById('registrationModal');
+    const buttons = {
+      church: document.getElementById('churchBtn'),
+      individual: document.getElementById('individualBtn'),
+      group: document.getElementById('groupBtn')
+    };
+
+    if (school && school.name) {
+      nameEl.textContent = school.name;
+      locationEl.textContent = `Location: ${city}`;
+    } else {
+      nameEl.textContent = "School Not Found";
+      locationEl.textContent = "";
+      descEl.textContent = "Unable to load school details. Please return to the map and select a school again.";
+
+      Object.values(buttons).forEach(btn => btn.disabled = true);
+    }
+
+    // Modal handling
+    function openModal(type) {
+      if (!school || !school.name) return;
+
+      const titles = {
+        church: "Register as Church",
+        individual: "Register as Individual",
+        group: "Register as Group"
+      };
+      document.getElementById('modalTitle').textContent = titles[type] || "Register";
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      if (event.target === modal) closeModal();
+    }
+
+    // Form submission
+    document.getElementById('registrationForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const dob = document.getElementById('dob').value;
+
+      if (calculateAge(dob) < 18) {
+        alert("You must be at least 18 years old to register.");
+        return;
+      }
+
+      alert(`Revival adoption successful for ${school?.name || 'the selected school'}!`);
+      window.location.href = "dashboard.html";
+    });
+  </script>
+</body>
+</html>

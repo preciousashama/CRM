@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Institution Profile — Read More</title>
+
+  <!-- tasteful system / web font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --accent: #012169; /* original brand navy */
+      --accent-2: #6a00ff;
+      --success: #012169;
+      --danger: #012169;
+      --radius: 10px;
+      --max-width: 1100px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background: var(--bg);
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin:0;
+      color:#111827;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding: 24px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .shell{
+      width:100%;
+      max-width:var(--max-width);
+      background:transparent;
+    }
+
+    header.site-header{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo {
+      width:54px;
+      height:54px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:700;
+      font-size:18px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.15);
+    }
+
+    .site-title {
+      font-size:1.05rem;
+      font-weight:700;
+      color:var(--accent);
+    }
+
+    .site-sub {
+      color:var(--muted);
+      font-size:0.9rem;
+    }
+
+    nav.breadcrumbs {
+      margin-left:auto;
+      font-size:0.9rem;
+      color:var(--muted);
+    }
+
+    main.card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 6px 20px rgba(12,20,40,0.06);
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 22px;
+    }
+
+    /* Page header area inside the card */
+    .profile-header {
+      grid-column: 1 / -1;
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+      border-bottom: 1px solid #eef2f7;
+      padding-bottom:16px;
+      margin-bottom:12px;
+    }
+
+    .institution-crest {
+      width:84px;
+      height:84px;
+      border-radius:12px;
+      background: linear-gradient(180deg, #eef2ff, #ffffff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:32px;
+      color:var(--accent);
+      box-shadow: 0 6px 18px rgba(2,10,35,0.04);
+      flex-shrink:0;
+    }
+
+    .header-meta {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-width:0;
+    }
+
+    .school-name {
+      font-size:1.35rem;
+      font-weight:700;
+      color:#0f1724;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .school-location {
+      color:var(--muted);
+      font-size:0.95rem;
+    }
+
+    .tag-row{
+      display:flex;
+      gap:8px;
+      margin-top:6px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#f1f5f9;
+      color:#0f1724;
+      padding:6px 8px;
+      border-radius: 999px;
+      font-size:0.85rem;
+      font-weight:600;
+    }
+
+    /* left details */
+    .details {
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,0.98));
+      padding: 14px;
+      border-radius:8px;
+      border: 1px solid #f1f5f9;
+    }
+
+    .details h3 {
+      margin:0 0 8px 0;
+      font-size:1.03rem;
+      color:var(--accent);
+    }
+
+    .lead {
+      color: #374151;
+      margin-bottom:12px;
+    }
+
+    .meta-list{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px 20px;
+    }
+
+    .meta-item{
+      background:#fbfdff;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid #f3f6fb;
+    }
+
+    .meta-item dt { font-size:0.82rem; color:var(--muted); margin-bottom:6px; }
+    .meta-item dd { margin:0; font-weight:600; color:#0f1724; }
+
+    .about {
+      margin-top:14px;
+      padding:12px;
+      background: #ffffff;
+      border-radius:8px;
+      border:1px solid #f1f5f9;
+    }
+
+    /* right column */
+    aside.panel {
+      position:relative;
+      top:0;
+      align-self:start;
+      background:linear-gradient(180deg,#fff,#ffffff);
+      border-radius:8px;
+      border: 1px solid #eef2f7;
+      padding:16px;
+    }
+
+    .panel .cta {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 14px;
+      border-radius:8px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      color:#fff;
+      font-size:0.95rem;
+      width:100%;
+    }
+    .btn.primary { background: var(--accent); }
+    .btn.ghost { background: #f1f5f9; color: var(--accent); font-weight:700; border:1px solid #e6eefc; }
+    .btn.prayer { background: var(--success); }
+    .btn.revival { background: var(--danger); }
+
+    .small {
+      font-size:0.86rem;
+      color:var(--muted);
+    }
+
+    .quick-facts {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .fact {
+      background:#f8fbff;
+      padding:8px 10px;
+      border-radius:8px;
+      font-weight:600;
+      color:var(--accent);
+      font-size:0.9rem;
+    }
+
+    footer.page-foot {
+      margin-top:16px;
+      font-size:0.9rem;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    .back-link {
+      text-decoration:none;
+      color:var(--accent);
+      background: #eef4ff;
+      padding:8px 12px;
+      border-radius:8px;
+      border:1px solid rgba(2,6,23,0.04);
+      font-weight:700;
+    }
+
+    /* messages */
+    .message {
+      padding:18px;
+      border-radius:8px;
+      background:#fff;
+      border:1px solid #f1f5f9;
+      color:#374151;
+    }
+
+    /* responsive */
+    @media (max-width: 880px) {
+      main.card { grid-template-columns: 1fr; padding:14px; }
+      aside.panel { order: 2; }
+      .profile-header { align-items:flex-start; gap:12px; }
+      .institution-crest { width:68px;height:68px;font-size:22px }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="shell" role="document">
+    <header class="site-header" role="banner">
+      <div class="brand" aria-hidden="true">
+        <div class="logo" aria-hidden="true">UN</div>
+        <div>
+          <div class="site-title">University Network</div>
+          <div class="site-sub">Profiles • Prayer • Outreach</div>
+        </div>
+      </div>
+
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <span id="breadcrumb-map">Map</span> › <strong id="breadcrumb-city">City</strong> › <span id="breadcrumb-school">School</span>
+      </nav>
+    </header>
+
+    <main class="card" role="main" aria-labelledby="school-name">
+      <!-- Header area -->
+      <div class="profile-header" role="region" aria-label="Institution summary">
+        
+        <div class="header-meta">
+          <div class="school-name" id="school-name">Loading…</div>
+          <div class="school-location small" id="school-location">Location</div>
+
+          <div class="tag-row" id="tag-row">
+            <!-- badges inserted dynamically -->
+          </div>
+
+          <div class="small" id="joined-info" style="margin-top:8px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <!-- Left: detailed info -->
+      <section class="details" aria-labelledby="details-heading">
+        <h3 id="details-heading">Institution Details</h3>
+
+        <p class="lead" id="lead-intro">Comprehensive information about this institution, pulled from the database.</p>
+
+        <div class="meta-list" id="meta-list">
+          <!-- meta items (dl) added here -->
+        </div>
+
+        <div class="about" id="about-section" aria-label="About this institution">
+          <h4 style="margin:0 0 8px 0;color:var(--accent);font-size:0.98rem;">About this institution</h4>
+          <p id="about-text" style="margin:0;color:#374151;"></p>
+        </div>
+      </section>
+
+      <!-- Right: actions & quick facts -->
+      <aside class="panel" aria-labelledby="actions-heading">
+        <h3 id="actions-heading" style="margin:0;color:var(--accent);">Next steps</h3>
+        <div class="small" style="margin-top:6px;">Get involved — select an action below</div>
+
+        <div class="cta" id="action-ctas">
+          <button class="btn primary" id="visit-site" style="display:none" aria-hidden="true">Visit Institution Website</button>
+          <button class="btn prayer" id="adopt-prayer">Adopt for Prayer</button>
+          <button class="btn revival" id="adopt-revival">Adopt for Revival</button>
+    
+        </div>
+
+        <div style="margin-top:14px;">
+          <div class="small">Quick facts</div>
+          <div class="quick-facts" id="quick-facts">
+            <!-- badges -->
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <a class="back-link" id="back-to-map" href="map.html">← Back to Map</a>
+        </div>
+      </aside>
+
+      <footer class="page-foot" role="contentinfo">
+        <div class="small">Profile data shown is managed locally in your browser's storage.</div>
+        <div class="small">If something looks off, please check the source data.</div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Friendly robust param parsing
+    function getQueryParams() {
+      const q = {};
+      const sp = new URLSearchParams(window.location.search);
+      for (const [k, v] of sp.entries()) q[k] = v;
+      return q;
+    }
+
+    const params = getQueryParams();
+    const cityParam = params.city;
+    const indexParam = params.index !== undefined ? parseInt(params.index, 10) : NaN;
+
+    // utility to create meta items
+    function createMetaItem(label, value){
+      const container = document.createElement('div');
+      container.className = 'meta-item';
+      const dt = document.createElement('dt'); dt.textContent = label;
+      const dd = document.createElement('dd'); dd.textContent = value ?? 'N/A';
+      container.appendChild(dt); container.appendChild(dd);
+      return container;
+    }
+
+    function showMessage(msg){
+      const left = document.querySelector('.details');
+      left.innerHTML = `<div class="message">${msg}</div>`;
+      document.getElementById('school-name').textContent = 'No data';
+      document.getElementById('school-location').textContent = '';
+      document.getElementById('breadcrumb-school').textContent = '';
+      document.getElementById('breadcrumb-city').textContent = cityParam || '';
+      document.getElementById('tag-row').innerHTML = '';
+      document.getElementById('joined-info').textContent = '';
+      document.getElementById('about-text').textContent = '';
+      document.getElementById('meta-list').innerHTML = '';
+      document.getElementById('action-ctas').style.display = 'none';
+    }
+
+    if (!cityParam || Number.isNaN(indexParam)) {
+      showMessage('Invalid request — city or school index is missing from the URL.');
+    } else {
+      const data = JSON.parse(localStorage.getItem('cityChildren') || '{}');
+      const schoolsForCity = data[cityParam] || [];
+      const school = schoolsForCity[indexParam];
+
+      if (!school) {
+        showMessage('School not found for the provided city/index.');
+      } else {
+        // Fill header
+        const nameEl = document.getElementById('school-name');
+        const locEl = document.getElementById('school-location');
+        const breadcrumbCity = document.getElementById('breadcrumb-city');
+        const breadcrumbSchool = document.getElementById('breadcrumb-school');
+        const tagRow = document.getElementById('tag-row');
+        const joinedInfo = document.getElementById('joined-info');
+        const aboutText = document.getElementById('about-text');
+        const metaList = document.getElementById('meta-list');
+        const quickFacts = document.getElementById('quick-facts');
+
+        nameEl.textContent = school.name || 'Unnamed Institution';
+        locEl.textContent = `Location: ${cityParam}`;
+        breadcrumbCity.textContent = cityParam;
+        breadcrumbSchool.textContent = school.name || 'School';
+
+        // badges / tags
+        tagRow.innerHTML = '';
+        const pushBadge = (txt) => {
+          const b = document.createElement('span'); b.className = 'badge'; b.textContent = txt; tagRow.appendChild(b);
+        };
+
+        // Scholarship / Visa
+        if (school.scholarships) pushBadge('Scholarships: ' + (String(school.scholarships).toLowerCase() === 'yes' ? 'Available' : school.scholarships));
+        if (school.visaSupport) pushBadge('Visa Support: ' + (String(school.visaSupport).toLowerCase() === 'yes' ? 'Yes' : school.visaSupport));
+        if (school.accreditation) pushBadge('Rank: ' + school.accreditation);
+
+        // joined date
+        let joinedText = 'Added: N/A';
+        if (school.JoinedCRMProgram) {
+          const d = new Date(school.JoinedCRMProgram);
+          if (!isNaN(d)) joinedText = 'Added: ' + d.toLocaleString();
+        }
+        joinedInfo.textContent = joinedText;
+
+        // about
+        aboutText.textContent = school.About || 'No description available.';
+
+        // meta grid
+        metaList.innerHTML = '';
+        metaList.appendChild(createMetaItem('Programs & Majors', school.programs || 'N/A'));
+        metaList.appendChild(createMetaItem('Accreditation & Ranking', school.accreditation || 'N/A'));
+        metaList.appendChild(createMetaItem('Tuition & Fees', school.tuition || 'N/A'));
+        metaList.appendChild(createMetaItem('Scholarships', school.scholarships || 'N/A'));
+        metaList.appendChild(createMetaItem('Campus Facilities', school.facilities || 'N/A'));
+        metaList.appendChild(createMetaItem('Student Diversity', school.diversity || 'N/A'));
+        metaList.appendChild(createMetaItem('Graduate Employment', school.employment || 'N/A'));
+        metaList.appendChild(createMetaItem('Admission Rate', school.admissionRate || 'N/A'));
+        metaList.appendChild(createMetaItem('Visa Support', school.visaSupport || 'N/A'));
+        metaList.appendChild(createMetaItem('Language Requirements', school.languageReq || 'N/A'));
+
+        // quick-facts
+        quickFacts.innerHTML = '';
+        if (school.tuition) {
+          const t = document.createElement('div'); t.className = 'fact'; t.textContent = 'Tuition: ' + school.tuition; quickFacts.appendChild(t);
+        }
+        if (school.accreditation) {
+          const t = document.createElement('div'); t.className = 'fact'; t.textContent = 'Rank: ' + school.accreditation; quickFacts.appendChild(t);
+        }
+        if (school.scholarships) {
+          const t = document.createElement('div'); t.className = 'fact'; t.textContent = (String(school.scholarships).toLowerCase()==='yes' ? 'Scholarships' : school.scholarships); quickFacts.appendChild(t);
+        }
+
+        // Actions: keep your existing navigation logic but enhanced with buttons
+        const visitBtn = document.getElementById('visit-site');
+        const adoptPrayer = document.getElementById('adopt-prayer');
+        const adoptRevival = document.getElementById('adopt-revival');
+
+        // If the school object contains a 'website' property, show Visit button
+        if (school.website) {
+          visitBtn.style.display = 'inline-flex';
+          visitBtn.onclick = () => {
+            let url = school.website;
+            // fix if missing protocol
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+            window.open(url, '_blank');
+          };
+        } else {
+          visitBtn.style.display = 'none';
+        }
+
+        adoptPrayer.onclick = () => { window.location.href = 'adopt-prayer.html?city=' + encodeURIComponent(cityParam) + '&index=' + indexParam; };
+        adoptRevival.onclick = () => { window.location.href = 'adopt-revival.html?city=' + encodeURIComponent(cityParam) + '&index=' + indexParam; };
+
+        shareBtn.onclick = async () => {
+          const shareData = {
+            title: school.name || 'Institution profile',
+            text: 'Check out this institution: ' + (school.name || '') + ' — ' + cityParam,
+            url: window.location.href
+          };
+          if (navigator.share) {
+            try { await navigator.share(shareData); } catch (err) { /* user canceled */ }
+          } else {
+            // fallback: copy URL
+            navigator.clipboard?.writeText(window.location.href).then(() => {
+              alert('Profile link copied to clipboard.');
+            }).catch(()=>{ alert('Copy this URL: ' + window.location.href); });
+          }
+        };
+
+        printBtn.onclick = () => window.print();
+
+        // Fill the small "crest" square with initials (fallback)
+        const crest = document.getElementById('crest');
+        if (!school.icon && school.name) {
+          const initials = (school.name.split(/\s+/).slice(0,2).map(s=>s[0]).join('')).toUpperCase();
+          crest.textContent = initials || '';
+        } else if (school.icon) {
+          crest.textContent = ''; // if you had an icon URL you could set as background image - kept simple here
+        }
+      }
+    }
+
+    // Accessibility: focus the name for screen readers
+    document.getElementById('school-name').setAttribute('tabindex', '-1');
+    document.getElementById('school-name').focus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+    }
+
+    header {
+      background-color: #012169;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      flex: 1 1 300px;
+      min-height: 200px;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-top: 0;
+      color: #012169;
+    }
+
+    #clock {
+      font-size: 1.5rem;
+      color: #ffffff;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      font-size: 1rem;
+      resize: vertical;
+    }
+
+    button {
+      background-color: #012169;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #012169;
+    }
+
+    input[type="text"], input[type="email"], select {
+      padding: 8px;
+      width: 100%;
+      margin: 5px 0 10px;
+      font-size: 1rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 300px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Welcome, John Doe</h1>
+    <div id="clock"></div>
+  </header>
+
+  <section class="dashboard">
+
+    <!-- Calendar -->
+    <div class="card">
+      <h2>Calendar</h2>
+      <iframe src="https://calendar.google.com/calendar/embed?src=en.uk%23holiday%40group.v.calendar.google.com&ctz=UTC" frameborder="0"></iframe>
+    </div>
+
+    <!-- Book Meeting -->
+    <div class="card">
+      <h2>Book a Call / Meeting</h2>
+      <p>Schedule a session with CRM team.</p>
+      <input type="text" placeholder="Your Email">
+      <input type="text" placeholder="Preferred Date & Time">
+      <button onclick="alert('Your meeting has been requested!')">Book Meeting</button>
+    </div>
+
+    <!-- Prayer Cell -->
+    <div class="card">
+      <h2>Prayer Cell</h2>
+      <p>Join a prayer cell group to intercede for schools and students together.</p>
+      <button onclick="alert('You have joined the prayer cell!')">Join Prayer Cell</button>
+    </div>
+
+    <!-- Contact Office -->
+    <div class="card">
+      <h2>Contact Office</h2>
+      <p>Need help? Reach out to our support team.</p>
+      <button onclick="window.location.href='mailto:support@crm.org'">Email Support</button>
+    </div>
+
+    <!-- CRM Intro -->
+    <div class="card">
+      <h2>CRM Portal Introduction</h2>
+      <p>Welcome to CRM! CRM is dedicated to transforming lives through the power of prayer, discipleship, and spiritual engagement on campuses. We aim to ignite revival, equip leaders, and partner with you to impact this generation.</p>
+    </div>
+
+    <!-- CRM Facts -->
+    <div class="card">
+      <h2>CRM Facts</h2>
+      <ul>
+        <li>Active in 120+ universities</li>
+        <li>50,000+ prayer partners</li>
+        <li>Started in 2005</li>
+        <li>Global outreach</li>
+      </ul>
+    </div>
+
+    <!-- Adopted -->
+    <div class="card">
+      <h2>Schools & Universities Adopted</h2>
+      <ul>
+        <li>Notre Dame</li>
+        <li>Univeristy of Arts</li>
+        <li>University of London</li>
+        <button onclick="window.location.href='map.html'">Adopt another school or university</button>
+
+
+      </ul>
+    </div>
+
+    <!-- Resources -->
+    <div class="card">
+      <h2>Resources</h2>
+      <p>Download materials to help you pray effectively and lead prayer meetings.</p>
+      <button onclick="window.open('https://example.com/resources')">Download Resources</button>
+    </div>
+
+    <!-- Collaborate -->
+    <div class="card">
+      <h2>Collaborate or Partner with CRM</h2>
+      <p>Join hands with us to reach more campuses. Fill out a short form to partner or collaborate.</p>
+      <button onclick="alert('Partnership form coming soon')">Partner Now</button>
+    </div>
+
+    <!-- Personal Planner -->
+    <div class="card">
+      <h2>Personal Planner / Digital Journal</h2>
+      <textarea placeholder="Write your thoughts, prayers, or plans here..."></textarea>
+      <button onclick="alert('Saved successfully!')">Save Notes</button>
+    </div>
+
+  </section>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const clock = document.getElementById('clock');
+      clock.textContent = now.toLocaleString();
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to SponsorMap UK</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Background map setup */
+   .background { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: url('ukflag.png') no-repeat center center; 
+      background-size: cover; 
+      opacity: 1; 
+      z-index: -2; 
+    }
+
+    .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.70); /* Adjust transparency here */
+  z-index: 1;
+}
+
+
+    /* Pin container for animated pins */
+    .pin-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .pin {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #e80303;
+  border: 2px solid white;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  animation: fadeOut 4s forwards;
+  box-shadow: 0 0 8px rgba(255,255,255,0.8);
+}
+
+
+    @keyframes fadeOut {
+      0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-45deg);
+      }
+      10% {
+        opacity: 1;
+        transform: scale(1.2) rotate(-45deg);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-45deg);
+      }
+    }
+
+    /* Container fade-in */
+    .container {
+      position: relative;
+      max-width: 800px;
+      margin: auto;
+      padding: 300px 20px;
+      border-radius: 15px;
+      color: white;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 2s forwards;
+      z-index: 3;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      white-space: nowrap; /* keep on one line */
+    }
+
+    p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+      margin-bottom: 30px;
+    }
+
+    .enter-button,
+    .about-button {
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      color: #012169;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 5px;
+    }
+
+    
+  </style>
+</head>
+<body>
+  <div class="background"></div>
+  <div class="pin-container" id="pinContainer"></div>
+  <div class="background"></div>
+  <div class="overlay"></div>
+
+
+  <div class="container">
+    <h1>Welcome to Campus Revivial Movement</h1>
+    <h2>The UK’s first Christian education adoption initiative</h2>
+    <p>
+      Here, you can adopt a school, church, or individual for prayer and revival. Our mission is to empower young people to boldly live out their faith while finding strength, support, and encouragement within the body of Christ.
+    </p>
+    <button class="about-button" onclick="window.location.href='about.html'">About CRM</button>
+    <button class="enter-button" onclick="window.location.href='map.html'">Go to Map</button>
+  </div>
+
+  <script>
+  const pinContainer = document.getElementById('pinContainer');
+
+  // Predefined pin positions (adjust values to match map)
+  const pinPositions = [
+    { left: "45vw", top: "30vh" }, // London
+    { left: "50vw", top: "15vh" }, // Manchester
+    { left: "40vw", top: "50vh" }, // Birmingham
+    { left: "35vw", top: "65vh" }, // Cardiff
+    { left: "55vw", top: "70vh" },  // Southampton
+    { left: "58vw", top: "80vh" },
+    { left: "65vw", top: "70vh" }  
+  ];
+
+  // Create a pin at a specific position with animation
+  function createPin(x, y) {
+    const pin = document.createElement('div');
+    pin.classList.add('pin');
+    pin.style.left = x;
+    pin.style.top = y;
+    pinContainer.appendChild(pin);
+
+    // Remove pin after animation ends
+    setTimeout(() => {
+      pin.remove();
+    }, 4000);
+  }
+
+  // Cycle through predefined pins and animate them
+  let currentIndex = 0;
+  function cyclePins() {
+    const pos = pinPositions[currentIndex];
+    createPin(pos.left, pos.top);
+
+    currentIndex = (currentIndex + 1) % pinPositions.length; // loop back
+  }
+
+  // Create a pin every 500ms
+  setInterval(cyclePins, 500);
+</script>
+
+</body>
+</html>
