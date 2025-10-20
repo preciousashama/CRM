@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome to SponsorMap UK</title>
+  <title>Welcome to Campus Revival Movement</title>
   <style>
     body {
       margin: 0;
@@ -12,8 +12,7 @@
       overflow: hidden;
     }
 
-    /* Background map setup */
-   .background { 
+    .background { 
       position: fixed; 
       top: 0; 
       left: 0; 
@@ -26,17 +25,15 @@
     }
 
     .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.70); /* Adjust transparency here */
-  z-index: 1;
-}
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.70);
+      z-index: 1;
+    }
 
-
-    /* Pin container for animated pins */
     .pin-container {
       position: fixed;
       top: 0;
@@ -48,34 +45,23 @@
     }
 
     .pin {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: #e80303;
-  border: 2px solid white;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  animation: fadeOut 4s forwards;
-  box-shadow: 0 0 8px rgba(255,255,255,0.8);
-}
-
-
-    @keyframes fadeOut {
-      0% {
-        opacity: 0;
-        transform: scale(0.5) rotate(-45deg);
-      }
-      10% {
-        opacity: 1;
-        transform: scale(1.2) rotate(-45deg);
-      }
-      100% {
-        opacity: 0;
-        transform: scale(0.5) rotate(-45deg);
-      }
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #e80303;
+      border: 2px solid white;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      animation: fadeOut 4s forwards;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
     }
 
-    /* Container fade-in */
+    @keyframes fadeOut {
+      0% { opacity: 0; transform: scale(0.5) rotate(-45deg); }
+      10% { opacity: 1; transform: scale(1.2) rotate(-45deg); }
+      100% { opacity: 0; transform: scale(0.5) rotate(-45deg); }
+    }
+
     .container {
       position: relative;
       max-width: 800px;
@@ -94,17 +80,9 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-      white-space: nowrap; /* keep on one line */
-    }
-
-    p {
-      font-size: 1.2rem;
-      line-height: 1.5;
-      margin-bottom: 30px;
-    }
+    h1 { font-size: 2.5rem; margin-bottom: 20px; white-space: nowrap; }
+    h2 { font-size: 1.8rem; margin-bottom: 20px; }
+    p { font-size: 1.2rem; line-height: 1.5; margin-bottom: 30px; }
 
     .enter-button,
     .about-button {
@@ -116,68 +94,76 @@
       text-decoration: none;
       font-weight: bold;
       margin: 5px;
+      border-radius: 5px;
+      background: white;
     }
-
-    
   </style>
 </head>
 <body>
   <div class="background"></div>
   <div class="pin-container" id="pinContainer"></div>
-  <div class="background"></div>
   <div class="overlay"></div>
 
-
   <div class="container">
-    <h1>Welcome to Campus Revivial Movement</h1>
-    <h2>The UK’s first Christian education adoption initiative</h2>
+    <h1>Welcome to Campus Revival Movement</h1>
+    <h2>The UK's first Christian education adoption initiative</h2>
     <p>
       Here, you can adopt a school, church, or individual for prayer and revival. Our mission is to empower young people to boldly live out their faith while finding strength, support, and encouragement within the body of Christ.
     </p>
+    
+    <div id="loginStatus" style="margin-bottom: 20px; font-size: 1rem;">
+      <span id="welcomeMsg">Join the movement today!</span>
+    </div>
+    
     <button class="about-button" onclick="window.location.href='about.html'">About CRM</button>
     <button class="enter-button" onclick="window.location.href='map.html'">Go to Map</button>
+    <button class="enter-button" id="loginBtn" onclick="window.location.href='login.html'">Login</button>
   </div>
 
+  <!-- YOUR ORIGINAL PIN SCRIPT -->
   <script>
-  const pinContainer = document.getElementById('pinContainer');
+    const pinContainer = document.getElementById('pinContainer');
+    const pinPositions = [
+      { left: "45vw", top: "30vh" }, // London
+      { left: "50vw", top: "15vh" }, // Manchester
+      { left: "40vw", top: "50vh" }, // Birmingham
+      { left: "35vw", top: "65vh" }, // Cardiff
+      { left: "55vw", top: "70vh" },  // Southampton
+      { left: "58vw", top: "80vh" },
+      { left: "65vw", top: "70vh" }  
+    ];
 
-  // Predefined pin positions (adjust values to match map)
-  const pinPositions = [
-    { left: "45vw", top: "30vh" }, // London
-    { left: "50vw", top: "15vh" }, // Manchester
-    { left: "40vw", top: "50vh" }, // Birmingham
-    { left: "35vw", top: "65vh" }, // Cardiff
-    { left: "55vw", top: "70vh" },  // Southampton
-    { left: "58vw", top: "80vh" },
-    { left: "65vw", top: "70vh" }  
-  ];
+    function createPin(x, y) {
+      const pin = document.createElement('div');
+      pin.classList.add('pin');
+      pin.style.left = x;
+      pin.style.top = y;
+      pinContainer.appendChild(pin);
+      setTimeout(() => { pin.remove(); }, 4000);
+    }
 
-  // Create a pin at a specific position with animation
-  function createPin(x, y) {
-    const pin = document.createElement('div');
-    pin.classList.add('pin');
-    pin.style.left = x;
-    pin.style.top = y;
-    pinContainer.appendChild(pin);
+    let currentIndex = 0;
+    function cyclePins() {
+      const pos = pinPositions[currentIndex];
+      createPin(pos.left, pos.top);
+      currentIndex = (currentIndex + 1) % pinPositions.length;
+    }
+    setInterval(cyclePins, 500);
+  </script>
 
-    // Remove pin after animation ends
-    setTimeout(() => {
-      pin.remove();
-    }, 4000);
-  }
-
-  // Cycle through predefined pins and animate them
-  let currentIndex = 0;
-  function cyclePins() {
-    const pos = pinPositions[currentIndex];
-    createPin(pos.left, pos.top);
-
-    currentIndex = (currentIndex + 1) % pinPositions.length; // loop back
-  }
-
-  // Create a pin every 500ms
-  setInterval(cyclePins, 500);
-</script>
-
+  <!-- NEW: LOGIN INTEGRATION -->
+  <script src="utils/api.js"></script>
+  <script>
+    window.addEventListener('load', async () => {
+      if (isLoggedIn()) {
+        const user = getCurrentUser();
+        document.getElementById('welcomeMsg').innerHTML = 
+          `Welcome back, <strong>${user.name}</strong>!`;
+        document.getElementById('loginBtn').textContent = 'Dashboard';
+        document.getElementById('loginBtn').onclick = () => 
+          window.location.href = 'dashboard.html';
+      }
+    });
+  </script>
 </body>
 </html>
