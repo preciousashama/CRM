@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Add School or University</title>
+  <title>Add School or University - CRM Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -29,11 +29,28 @@
       background-color: var(--primary);
       color: white;
       padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     header h1 {
       font-size: 1.8rem;
       margin: 0;
+    }
+
+    .user-info {
+      font-size: 1rem;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
     }
 
     main {
@@ -63,6 +80,7 @@
     }
 
     input[type="text"],
+    input[type="number"],
     select,
     textarea {
       width: 100%;
@@ -93,15 +111,33 @@
       transition: background-color 0.3s ease;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       background-color: #000f3a;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
 
     #message {
       margin-top: 20px;
+      padding: 12px;
+      border-radius: 4px;
       font-weight: bold;
-      color: green;
       display: none;
+    }
+
+    #message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    #message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
 
     .footer-btn {
@@ -116,28 +152,46 @@
       cursor: pointer;
     }
 
+    .loading {
+      text-align: center;
+      color: #666;
+      display: none;
+    }
+
     @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+      .form-grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; gap: 10px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Admin Dashboard – CRM FORM</h1>
+    <h1>Admin Dashboard – Add School/University</h1>
+    <div class="user-info">
+      <span id="userName">Loading...</span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
   </header>
 
   <main>
     <div class="form-wrapper">
-      <form id="cityForm" class="form-grid">
+      <form id="schoolForm" class="form-grid">
 
-        <label for="uniname">School / University Name:</label>
-        <input type="text" id="uniname" required />
+        <label for="name">School / University Name *:</label>
+        <input type="text" id="name" required />
 
-        <label for="city">Choose Location:</label>
-        <select id="city" required>
+        <label for="lat">Latitude *:</label>
+        <input type="number" id="lat" step="any" placeholder="51.5074" required />
+
+        <label for="lng">Longitude *:</label>
+        <input type="number" id="lng" step="any" placeholder="-0.1278" required />
+
+        <label for="address">Full Address *:</label>
+        <input type="text" id="address" required />
+
+        <label for="city">City:</label>
+        <select id="city">
           <option value="">-- Select --</option>
           <option value="London">London</option>
           <option value="Oxford">Oxford</option>
@@ -145,7 +199,7 @@
           <option value="Manchester">Manchester</option>
           <option value="Birmingham">Birmingham</option>
           <option value="Glasgow">Glasgow</option>
-          <option value="StAndrews">St Andrews</option>
+          <option value="St Andrews">St Andrews</option>
           <option value="Edinburgh">Edinburgh</option>
           <option value="Liverpool">Liverpool</option>
           <option value="Bristol">Bristol</option>
@@ -172,80 +226,138 @@
           <option value="Bradford">Bradford</option>
         </select>
 
-        <label for="About">About:</label>
-        <textarea id="About"></textarea>
+        <label for="description">About *:</label>
+        <textarea id="description" required placeholder="Description of the school..."></textarea>
 
         <label for="accreditation">Accreditation & Ranking:</label>
         <textarea id="accreditation"></textarea>
 
         <label for="scholarships">Scholarships Available:</label>
-        <select id="scholarships" name="scholarships">
+        <select id="scholarships">
           <option value="">-- Select --</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
         </select>
 
         <label for="visaSupport">Visa Support:</label>
-        <select id="visaSupport" name="visaSupport">
+        <select id="visaSupport">
           <option value="">-- Select --</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
         </select>
 
         <div class="full-width">
-          <button type="submit">Add to Map</button>
-          <div id="message">School/University added to the map!</div>
+          <button type="submit" id="submitBtn">Add to Map</button>
+          <div class="loading" id="loading">Adding school...</div>
+          <div id="message"></div>
         </div>
 
         <div class="full-width">
-          <button class="submit" type="button" onclick="window.location.href='records.html'">View Submitted Data</button>
+          <button class="footer-btn" type="button" onclick="window.location.href='records.html'">View All Schools</button>
         </div>
 
       </form>
     </div>
   </main>
 
+  <!-- API HELPERS -->
+  <script src="utils/api.js"></script>
   <script>
-    const form = document.getElementById('cityForm');
-    const message = document.getElementById('message');
+    let currentUser = null;
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const city = document.getElementById('city').value;
-      const uniname = document.getElementById('uniname').value;
-
-      if (!city || !uniname) {
-        alert("Please select a city and enter the institution name.");
+    // Load on page start
+    window.addEventListener('load', async () => {
+      if (!isLoggedIn()) {
+        window.location.href = '/login.html';
         return;
       }
-
-      const schoolData = {
-        name: uniname,
-        JoinedCRMProgram: new Date().toISOString(),
-        About: document.getElementById('About').value,
-        accreditation: document.getElementById('accreditation').value,
-        scholarships: document.getElementById('scholarships').value,
-        visaSupport: document.getElementById('visaSupport').value,
-      };
-
-      let data = JSON.parse(localStorage.getItem('cityChildren')) || {};
-      if (!data[city]) data[city] = [];
-      data[city].push(schoolData);
-      localStorage.setItem('cityChildren', JSON.stringify(data));
-
-      let savedCities = JSON.parse(localStorage.getItem('cities')) || [];
-      if (!savedCities.includes(city)) {
-        savedCities.push(city);
-        localStorage.setItem('cities', JSON.stringify(savedCities));
+      
+      try {
+        const data = await protectedFetch('http://localhost:5000/api/me');
+        currentUser = data.user;
+        
+        if (currentUser.role !== 'admin') {
+          alert('Admin access required!');
+          window.location.href = '/dashboard.html';
+          return;
+        }
+        
+        document.getElementById('userName').textContent = currentUser.name;
+      } catch (error) {
+        alert('Admin login required');
+        window.location.href = '/login.html';
       }
-
-      message.style.display = 'block';
-      message.textContent = `School/University "${uniname}" added to ${city}.`;
-
-      form.reset();
+      
+      setupForm();
     });
-  </script>
 
+    function setupForm() {
+      const form = document.getElementById('schoolForm');
+      const message = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
+      const loading = document.getElementById('loading');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+          name: document.getElementById('name').value.trim(),
+          lat: parseFloat(document.getElementById('lat').value),
+          lng: parseFloat(document.getElementById('lng').value),
+          address: document.getElementById('address').value.trim(),
+          description: document.getElementById('description').value.trim(),
+          accreditation: document.getElementById('accreditation').value,
+          scholarships: document.getElementById('scholarships').value,
+          visaSupport: document.getElementById('visaSupport').value,
+          city: document.getElementById('city').value
+        };
+
+        // Validation
+        if (!formData.name || !formData.lat || !formData.lng || !formData.address || !formData.description) {
+          showMessage('Please fill all required fields', 'error');
+          return;
+        }
+
+        if (formData.lat < -90 || formData.lat > 90 || formData.lng < -180 || formData.lng > 180) {
+          showMessage('Invalid coordinates', 'error');
+          return;
+        }
+
+        // Submit
+        submitBtn.disabled = true;
+        loading.style.display = 'block';
+
+        try {
+          const response = await protectedFetch('http://localhost:5000/api/schools', {
+            method: 'POST',
+            body: JSON.stringify(formData)
+          });
+
+          showMessage(`✅ "${formData.name}" added to map!`, 'success');
+          form.reset();
+        } catch (error) {
+          showMessage('❌ Failed to add school: ' + error.message, 'error');
+        } finally {
+          submitBtn.disabled = false;
+          loading.style.display = 'none';
+        }
+      });
+    }
+
+    function showMessage(text, type) {
+      const message = document.getElementById('message');
+      message.textContent = text;
+      message.className = type;
+      message.style.display = 'block';
+      setTimeout(() => {
+        message.style.display = 'none';
+      }, 5000);
+    }
+
+    async function logout() {
+      await logout();
+      window.location.href = '/index.html';
+    }
+  </script>
 </body>
 </html>

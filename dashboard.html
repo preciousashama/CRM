@@ -5,35 +5,26 @@
   <title>CRM Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f4f9;
     }
-
     header {
       background-color: #012169;
       color: white;
       padding: 20px;
       text-align: center;
     }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-
+    header h1 { margin: 0; font-size: 1.8rem; }
+    #clock { font-size: 1.5rem; color: #ffffff; }
     .dashboard {
       display: flex;
       flex-wrap: wrap;
       padding: 20px;
       gap: 20px;
     }
-
     .card {
       background: white;
       border-radius: 8px;
@@ -41,19 +32,28 @@
       padding: 20px;
       flex: 1 1 300px;
       min-height: 200px;
+      position: relative;
     }
-
+    .loading { text-align: center; color: #666; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .stat { 
+      background: #f0f8ff; 
+      padding: 10px; 
+      text-align: center; 
+      border-radius: 5px;
+      font-weight: bold;
+      color: #012169;
+    }
     .card h2 {
       font-size: 1.2rem;
       margin-top: 0;
       color: #012169;
     }
-
-    #clock {
-      font-size: 1.5rem;
-      color: #ffffff;
-    }
-
     textarea {
       width: 100%;
       height: 120px;
@@ -61,7 +61,6 @@
       font-size: 1rem;
       resize: vertical;
     }
-
     button {
       background-color: #012169;
       color: white;
@@ -70,127 +69,241 @@
       border-radius: 5px;
       cursor: pointer;
       margin-top: 10px;
+      width: 100%;
     }
-
-    button:hover {
-      background-color: #012169;
-    }
-
+    button:hover { background-color: #013369; }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
     input[type="text"], input[type="email"], select {
       padding: 8px;
       width: 100%;
       margin: 5px 0 10px;
       font-size: 1rem;
     }
-
-    iframe {
-      width: 100%;
-      height: 300px;
-      border: none;
+    iframe { width: 100%; height: 300px; border: none; }
+    .school-list { max-height: 200px; overflow-y: auto; }
+    .school-item { 
+      padding: 8px; 
+      border-bottom: 1px solid #eee; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
     }
+    .success { color: green; }
+    .error { color: red; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Welcome, John Doe</h1>
+    <h1 id="welcomeHeader">Welcome, Loading...</h1>
     <div id="clock"></div>
   </header>
 
   <section class="dashboard">
 
-    <!-- Calendar -->
+    <!-- STATS OVERVIEW -->
     <div class="card">
-      <h2>Calendar</h2>
-      <iframe src="https://calendar.google.com/calendar/embed?src=en.uk%23holiday%40group.v.calendar.google.com&ctz=UTC" frameborder="0"></iframe>
+      <h2>📊 Your Stats</h2>
+      <div id="statsGrid" class="loading">Loading...</div>
     </div>
 
-    <!-- Book Meeting -->
+    <!-- ADOPTED SCHOOLS -->
     <div class="card">
-      <h2>Book a Call / Meeting</h2>
-      <p>Schedule a session with CRM team.</p>
-      <input type="text" placeholder="Your Email">
-      <input type="text" placeholder="Preferred Date & Time">
-      <button onclick="alert('Your meeting has been requested!')">Book Meeting</button>
+      <h2>🏫 Adopted Schools (<span id="schoolsCount">0</span>)</h2>
+      <div id="adoptedSchools" class="school-list loading">Loading...</div>
+      <button onclick="window.location.href='map.html'">Adopt Another School</button>
     </div>
 
-    <!-- Prayer Cell -->
+    <!-- PERSONAL JOURNAL -->
     <div class="card">
-      <h2>Prayer Cell</h2>
-      <p>Join a prayer cell group to intercede for schools and students together.</p>
-      <button onclick="alert('You have joined the prayer cell!')">Join Prayer Cell</button>
+      <h2>📝 Prayer Journal (<span id="journalCount">0</span> entries)</h2>
+      <div id="recentJournals" class="loading">Loading...</div>
+      <textarea id="journalText" placeholder="Write your prayer or thoughts here..."></textarea>
+      <button onclick="saveJournal()">Save Prayer</button>
+      <div id="journalMessage"></div>
     </div>
 
-    <!-- Contact Office -->
+    <!-- BOOK MEETING -->
     <div class="card">
-      <h2>Contact Office</h2>
-      <p>Need help? Reach out to our support team.</p>
-      <button onclick="window.location.href='mailto:support@crm.org'">Email Support</button>
+      <h2>📞 Book a Call</h2>
+      <input type="email" id="meetingEmail" placeholder="Your Email">
+      <input type="text" id="meetingTime" placeholder="Preferred Date & Time">
+      <button onclick="bookMeeting()">Book Meeting</button>
+      <div id="meetingMessage"></div>
     </div>
 
-    <!-- CRM Intro -->
+    <!-- PRAYER CELL -->
     <div class="card">
-      <h2>CRM Portal Introduction</h2>
-      <p>Welcome to CRM! CRM is dedicated to transforming lives through the power of prayer, discipleship, and spiritual engagement on campuses. We aim to ignite revival, equip leaders, and partner with you to impact this generation.</p>
+      <h2>🙏 Prayer Cell</h2>
+      <button onclick="joinPrayerCell()">Join Prayer Cell</button>
+      <div id="cellMessage"></div>
     </div>
 
-    <!-- CRM Facts -->
+    <!-- CALENDAR -->
     <div class="card">
-      <h2>CRM Facts</h2>
-      <ul>
-        <li>Active in 120+ universities</li>
-        <li>50,000+ prayer partners</li>
-        <li>Started in 2005</li>
-        <li>Global outreach</li>
-      </ul>
-    </div>
-
-    <!-- Adopted -->
-    <div class="card">
-      <h2>Schools & Universities Adopted</h2>
-      <ul>
-        <li>Notre Dame</li>
-        <li>Univeristy of Arts</li>
-        <li>University of London</li>
-        <button onclick="window.location.href='map.html'">Adopt another school or university</button>
-
-
-      </ul>
-    </div>
-
-    <!-- Resources -->
-    <div class="card">
-      <h2>Resources</h2>
-      <p>Download materials to help you pray effectively and lead prayer meetings.</p>
-      <button onclick="window.open('https://example.com/resources')">Download Resources</button>
-    </div>
-
-    <!-- Collaborate -->
-    <div class="card">
-      <h2>Collaborate or Partner with CRM</h2>
-      <p>Join hands with us to reach more campuses. Fill out a short form to partner or collaborate.</p>
-      <button onclick="alert('Partnership form coming soon')">Partner Now</button>
-    </div>
-
-    <!-- Personal Planner -->
-    <div class="card">
-      <h2>Personal Planner / Digital Journal</h2>
-      <textarea placeholder="Write your thoughts, prayers, or plans here..."></textarea>
-      <button onclick="alert('Saved successfully!')">Save Notes</button>
+      <h2>📅 Calendar</h2>
+      <iframe src="https://calendar.google.com/calendar/embed?src=en.uk%23holiday%40group.v.calendar.google.com&ctz=UTC"></iframe>
     </div>
 
   </section>
 
+  <!-- API HELPERS -->
+  <script src="utils/api.js"></script>
   <script>
-    function updateClock() {
-      const now = new Date();
-      const clock = document.getElementById('clock');
-      clock.textContent = now.toLocaleString();
+    // Global variables
+    let dashboardData = null;
+
+    // Load dashboard on page load
+    window.addEventListener('load', async () => {
+      if (!isLoggedIn()) {
+        window.location.href = '/login.html';
+        return;
+      }
+      await loadDashboard();
+      updateClock();
+    });
+
+    async function loadDashboard() {
+      try {
+        const data = await getDashboard();
+        dashboardData = data;
+        updateUI();
+      } catch (error) {
+        console.error('Dashboard error:', error);
+        document.querySelectorAll('.loading').forEach(el => {
+          el.textContent = 'Error loading data';
+        });
+      }
     }
 
-    setInterval(updateClock, 1000);
-    updateClock();
-  </script>
+    function updateUI() {
+      const user = dashboardData.user;
+      document.getElementById('welcomeHeader').textContent = `Welcome, ${user.name}`;
+      
+      // Stats
+      const stats = dashboardData.stats;
+      document.getElementById('schoolsCount').textContent = stats.schoolsCount;
+      document.getElementById('journalCount').textContent = stats.journalCount;
+      
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat">Schools<br>${stats.schoolsCount}</div>
+        <div class="stat">Prayers<br>${stats.totalPrayers}</div>
+        <div class="stat">Journals<br>${stats.journalCount}</div>
+        <div class="stat">Days<br>${stats.daysActive}</div>
+      `;
 
+      // Adopted Schools
+      const schoolsList = document.getElementById('adoptedSchools');
+      if (stats.schoolsCount === 0) {
+        schoolsList.innerHTML = '<p style="color:#666">No schools adopted yet. <a href="map.html">Adopt now!</a></p>';
+      } else {
+        schoolsList.innerHTML = dashboardData.adoptions.map(school => `
+          <div class="school-item">
+            <div>
+              <strong>${school.name}</strong><br>
+              <small>${school.address}</small>
+            </div>
+            <div>
+              🙏 ${school.prayerCount}<br>
+              📝 ${school.journalEntries}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Recent Journals
+      const journalsDiv = document.getElementById('recentJournals');
+      if (stats.journalCount === 0) {
+        journalsDiv.innerHTML = '<p style="color:#666">No journal entries yet</p>';
+      } else {
+        journalsDiv.innerHTML = dashboardData.recentJournals.slice(0, 3).map(j => `
+          <div style="margin-bottom: 10px; padding: 8px; background: #f9f9f9; border-radius: 4px;">
+            <small>${new Date(j.date).toLocaleDateString()}</small><br>
+            <em>${j.schoolId ? `For ${j.schoolId.name}` : 'General'}</em><br>
+            ${j.entryText.substring(0, 100)}${j.entryText.length > 100 ? '...' : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    // Save Journal
+    async function saveJournal() {
+      const text = document.getElementById('journalText').value.trim();
+      if (!text) return showMessage('journalMessage', 'Please write something', 'error');
+
+      try {
+        const selectedSchoolId = dashboardData.adoptions[0]?.id || null;
+        await createJournalEntry(text, selectedSchoolId);
+        showMessage('journalMessage', 'Prayer saved! 🙏', 'success');
+        document.getElementById('journalText').value = '';
+        await loadDashboard(); // Refresh
+      } catch (error) {
+        showMessage('journalMessage', 'Failed to save: ' + error.message, 'error');
+      }
+    }
+
+    // Book Meeting
+    async function bookMeeting() {
+      const email = document.getElementById('meetingEmail').value.trim();
+      const time = document.getElementById('meetingTime').value.trim();
+      
+      if (!email || !time) {
+        return showMessage('meetingMessage', 'Please fill both fields', 'error');
+      }
+
+      try {
+        await fetch('http://localhost:5000/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: getCurrentUser().name,
+            email,
+            message: `Meeting request for: ${time}`,
+            type: 'meeting'
+          })
+        });
+        showMessage('meetingMessage', 'Meeting booked! We\'ll contact you soon.', 'success');
+        document.getElementById('meetingEmail').value = '';
+        document.getElementById('meetingTime').value = '';
+      } catch (error) {
+        showMessage('meetingMessage', 'Booking failed', 'error');
+      }
+    }
+
+    // Join Prayer Cell
+    async function joinPrayerCell() {
+      try {
+        await fetch('http://localhost:5000/api/prayer-cell', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: getCurrentUser().name,
+            email: getCurrentUser().email
+          })
+        });
+        showMessage('cellMessage', 'Welcome to Prayer Cell! Check your email.', 'success');
+      } catch (error) {
+        showMessage('cellMessage', 'Join failed', 'error');
+      }
+    }
+
+    function showMessage(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = type;
+      setTimeout(() => el.textContent = '', 3000);
+    }
+
+    // Clock
+    function updateClock() {
+      document.getElementById('clock').textContent = new Date().toLocaleString();
+    }
+    setInterval(updateClock, 1000);
+
+    // Logout
+    window.addEventListener('beforeunload', () => {
+      if (confirm('Logout?')) logout();
+    });
+  </script>
 </body>
 </html>
