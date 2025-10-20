@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Campus Revival Map!</title>
+  <title>Our Locations</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,25 +27,11 @@
       margin-bottom: 10px;
     }
 
-    .stats-bar {
-      background: rgba(255,255,255,0.1);
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px auto;
-      max-width: 600px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    .stat { font-size: 1rem; }
-    .stat strong { color: #ffd700; }
-
     header p {
       font-size: 1.1rem;
       max-width: 700px;
       margin: 0 auto;
-      color: #e0e0e0;
+      color: #012169;
     }
 
     .container {
@@ -55,6 +41,7 @@
       position: relative;
     }
 
+    /* Map takes full width (the side panel will overlay it) */
     #map {
       height: 75vh;
       width: 100%;
@@ -62,6 +49,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
+    /* Keep Leaflet popup width reasonable */
     .leaflet-popup-content {
       max-width: 400px !important;
       width: 100%;
@@ -82,13 +70,13 @@
       border-radius: 5px;
       font-weight: bold;
       cursor: pointer;
-      margin: 2px 0;
     }
 
+    /* --- Side panel (new) --- */
     #side-panel {
       position: fixed;
       top: 0;
-      right: -420px;
+      right: -420px; /* hidden by default */
       width: 420px;
       height: 100%;
       background: #ffffff;
@@ -105,9 +93,9 @@
     #side-panel.active { right: 0; }
 
     #side-panel header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       margin-bottom: 12px;
     }
 
@@ -128,20 +116,10 @@
       box-shadow: 0 1px 0 rgba(0,0,0,0.04);
     }
 
-    .school-card h3 { 
-      margin: 0 0 6px 0; 
-      font-size: 1rem; 
-      color: ${adopted ? '#dc3545' : '#28a745'};
-    }
-
+    .school-card h3 { margin: 0 0 6px 0; font-size: 1rem; }
     .school-card p { margin: 6px 0; color: #333; font-size: 0.95rem; }
 
-    .school-actions { 
-      margin-top: 10px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 8px; 
-    }
+    .school-actions { margin-top: 10px; display:flex; flex-direction:column; gap:8px; }
 
     .action-btn {
       padding: 10px;
@@ -153,12 +131,9 @@
       font-size: 0.95rem;
     }
 
-    .action-btn.primary { background: #012169; }
-    .action-btn.success { background: #28a745; }
-    .action-btn.danger { background: #dc3545; }
-    .action-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-    .loading { text-align: center; color: #666; padding: 20px; }
+    .action-btn.read-more { background: #012169; }
+    .action-btn.prayer { background: #012169; }
+    .action-btn.revival { background: #012169; }
 
     @media (max-width: 900px) {
       #side-panel { width: 100%; right: -100%; }
@@ -169,13 +144,10 @@
 </head>
 <body>
   <header>
-    <h1>Campus Revival Map</h1>
-    <div class="stats-bar" id="statsBar">
-      <div class="stat">Total: <strong id="totalSchools">0</strong></div>
-      <div class="stat">Adopted: <strong id="adoptedCount">0</strong></div>
-    </div>
+    <h1>Our Locations</h1>
     <p>
-      Click on a <span style="color:#28a745">🟢 GREEN</span> pin to adopt a school for prayer and revival!
+      We have various locations to choose from. Click on a pin on the map, select a school or university,
+      and decide whether you want to read more about the school, adopt it for prayer, or for revival.
     </p>
   </header>
 
@@ -183,192 +155,208 @@
     <div id="map"></div>
   </div>
 
+  <!-- Side panel (populated dynamically) -->
   <aside id="side-panel" aria-hidden="true">
     <header>
-      <h2 id="panel-city">Loading...</h2>
-      <button class="close-panel-btn" onclick="closePanel()">✖</button>
+      <h2 id="panel-city">City</h2>
+      <button class="close-panel-btn" onclick="closePanel()" aria-label="Close panel">✖</button>
     </header>
-    <div id="panel-content" class="loading">Loading schools...</div>
+    <div id="panel-content">
+      <!-- Injected school cards will go here -->
+    </div>
   </aside>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="utils/api.js"></script>
   <script>
-    let map, schools = [], currentUser = null, markers = {};
+    // --- existing data sources, untouched (still reads localStorage) ---
+    const cityCoords = {
+      London: [51.5074, -0.1278],
+      Manchester: [53.4808, -2.2426],
+      Birmingham: [52.4862, -1.8904],
+      Glasgow: [55.8642, -4.2518],
+      Edinburgh: [55.9533, -3.1883],
+      Liverpool: [53.4084, -2.9916],
+      Bristol: [51.4545, -2.5879],
+      Leeds: [53.8008, -1.5491],
+      Sheffield: [53.3811, -1.4701],
+      Newcastle: [54.9783, -1.6178],
+      Nottingham: [52.9548, -1.1581],
+      Southampton: [50.9097, -1.4044],
+      Portsmouth: [50.8198, -1.0880],
+      Brighton: [50.8225, -0.1372],
+      Plymouth: [50.3755, -4.1427],
+      Cardiff: [51.4816, -3.1791],
+      Belfast: [54.5973, -5.9301],
+      Derby: [52.9225, -1.4766],
+      Coventry: [52.4068, -1.5197],
+      Hull: [53.7676, -0.3274],
+      Dundee: [56.4620, -2.9707],
+      Aberdeen: [57.1497, -2.0943],
+      Inverness: [57.4778, -4.2247],
+      Swansea: [51.6214, -3.9436],
+      Reading: [51.4543, -0.9781],
+      Leicester: [52.6369, -1.1398],
+      Bradford: [53.7950, -1.7594],
+      Oxford: [51.7520, -1.2577],
+      Cambridge: [52.2053, 0.1218],
+      StAndrews: [56.3398, -2.7967],
+      Bangor: [53.2270, -4.1297],
+      Aberystwyth: [52.4153, -4.0829],
+      Coleraine: [55.1320, -6.6696],
+    };
 
-    // Initialize
-    async function initMap() {
-      if (!isLoggedIn()) {
-        window.location.href = '/login.html';
-        return;
-      }
+    // Map & tile layer
+    const map = L.map('map').setView([54.5, -3], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-      try {
-        // Get user
-        const userData = await protectedFetch('http://localhost:5000/api/me');
-        currentUser = userData.user;
+    // Read your saved data (unchanged)
+    const savedCities = JSON.parse(localStorage.getItem('cities')) || [];
+    const cityChildren = JSON.parse(localStorage.getItem('cityChildren')) || {};
 
-        // Get schools
-        const response = await protectedFetch('http://localhost:5000/api/schools');
-        schools = response.schools;
+    // Keep marker refs by city if we need them later
+    const markersByCity = {};
 
-        // Get stats
-        updateStats();
+    // Build markers and popups using your existing dynamic data
+    savedCities.forEach(city => {
+      const coords = cityCoords[city];
+      if (!coords) return;
 
-        // Create map
-        map = L.map('map').setView([54.5, -3], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 18,
-          attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+      const marker = L.marker(coords).addTo(map);
+      markersByCity[city] = marker;
 
-        // Add markers
-        addMarkers();
+      const schools = cityChildren[city] || [];
 
-        document.getElementById('panel-content').innerHTML = `
-          <div style="text-align:center; padding:20px">
-            Click any <span style="color:#28a745">🟢 GREEN</span> pin to adopt!
-          </div>
-        `;
-      } catch (error) {
-        document.getElementById('panel-content').innerHTML = 
-          '<div class="error">Failed to load schools. Please refresh.</div>';
-      }
-    }
+      let schoolListHTML = `<div><strong>${city}</strong>`;
+      if (schools.length === 0) {
+        schoolListHTML += `<p>No schools/universities added.</p>`;
+      } else {
+        schoolListHTML += `<div class="popup-scroll-container"><ul style="list-style:none; padding-left:0;">`;
 
-    function updateStats() {
-      const adopted = schools.filter(s => s.adopted).length;
-      document.getElementById('totalSchools').textContent = schools.length;
-      document.getElementById('adoptedCount').textContent = adopted;
-    }
-
-    function addMarkers() {
-      schools.forEach(school => {
-        const isAdopted = school.adopted;
-        const color = isAdopted ? 'red' : 'green';
-        
-        const marker = L.marker([school.lat, school.lng], {
-          icon: L.divIcon({
-            className: `marker-${color}`,
-            html: `<div style="background:${color}; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>`,
-            iconSize: [24, 24]
-          })
-        }).addTo(map);
-
-        markers[school._id] = marker;
-
-        marker.bindPopup(`
-          <div>
-            <h3 style="margin:0 0 5px 0; color:${isAdopted ? '#dc3545' : '#28a745'}">
-              ${school.name}
-            </h3>
-            <p><strong>${school.address}</strong></p>
-            ${isAdopted ? 
-              `<p style="color:#dc3545"><strong>✅ ADOPTED</strong></p>` : 
-              `<p style="color:#28a745"><strong>🟢 AVAILABLE</strong></p>`
-            }
-            <button onclick="openSchoolPanel('${school._id}')" 
-                    class="school-toggle-button" 
-                    style="margin-top:10px; ${isAdopted ? '' : 'background:#28a745 !important'}">
-              ${isAdopted ? 'View Details' : 'Adopt School'}
-            </button>
-          </div>
-        `);
-      });
-    }
-
-    function openSchoolPanel(schoolId) {
-      map.closePopup();
-      const school = schools.find(s => s._id === schoolId);
-      if (!school) return;
-
-      const isAdopted = school.adopted;
-      const panelCity = document.getElementById('panel-city');
-      const panelContent = document.getElementById('panel-content');
-      
-      panelCity.textContent = school.name;
-      panelContent.innerHTML = `
-        <div class="school-card">
-          <h3 style="color:${isAdopted ? '#dc3545' : '#28a745'}">
-            ${school.name} ${isAdopted ? '✅' : '🟢'}
-          </h3>
-          <p><strong>${school.address}</strong></p>
-          <p>${school.description}</p>
-          ${school.accreditation ? `<p><strong>Ranking:</strong> ${school.accreditation}</p>` : ''}
-          
-          <div class="school-actions">
-            ${!isAdopted ? `
-              <button class="action-btn success" onclick="adoptSchool('${schoolId}')">
-                🙏 Adopt for Prayer & Revival
+        schools.forEach((school, index) => {
+          // use an escaped city value for safe embedding in onclick
+          const escCity = city.replace(/'/g, "\\'");
+          schoolListHTML += `
+            <li style="margin-bottom:10px;">
+              <!-- When a user clicks a school, open the side panel (instead of expanding inline) -->
+              <button onclick="openSchoolPanel('${escCity}', ${index})" class="school-toggle-button">
+                ${school.name || 'Unnamed School'}
               </button>
-            ` : `
-              <button class="action-btn primary" onclick="viewJournal('${schoolId}')">
-                📝 View My Journal
-              </button>
-            `}
-            <button class="action-btn primary" onclick="closePanel()">
-              Close
-            </button>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('side-panel').classList.add('active');
-    }
-
-    async function adoptSchool(schoolId) {
-      try {
-        const btn = event.target;
-        btn.disabled = true;
-        btn.textContent = 'Adopting...';
-
-        const response = await protectedFetch('http://localhost:5000/api/adoptions', {
-          method: 'POST',
-          body: JSON.stringify({ schoolId })
+            </li>`;
         });
 
-        // Update UI instantly
-        const school = schools.find(s => s._id === schoolId);
-        school.adopted = true;
-        markers[schoolId].setIcon(L.divIcon({
-          className: 'marker-red',
-          html: `<div style="background:red; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>`,
-          iconSize: [24, 24]
-        }));
-
-        updateStats();
-        closePanel();
-        alert(`🎉 ${school.name} adopted successfully! Check your dashboard.`);
-
-      } catch (error) {
-        alert('Adoption failed: ' + error.message);
-      } finally {
-        location.reload(); // Refresh to show updates
+        schoolListHTML += `</ul></div>`;
       }
-    }
 
-    function viewJournal(schoolId) {
-      window.location.href = `dashboard.html?schoolId=${schoolId}`;
+      schoolListHTML += `</div>`;
+      marker.bindPopup(schoolListHTML);
+    });
+
+    // --- New behavior: side panel functions ---
+    function openSchoolPanel(cityName, index) {
+      // Close any open popup (keeps UI tidy)
+      if (map && map.closePopup) map.closePopup();
+
+      const schools = cityChildren[cityName] || [];
+      const school = schools[index];
+      if (!school) return;
+
+      // Populate the panel
+      const panelCity = document.getElementById('panel-city');
+      const panelContent = document.getElementById('panel-content');
+      panelCity.textContent = cityName;
+      panelContent.innerHTML = ''; // clear
+
+      // You might have multiple schools for a city; show the one clicked.
+      // Build a single card for the selected school (you can expand to list all if required)
+      const card = document.createElement('div');
+      card.className = 'school-card';
+
+      const title = document.createElement('h3');
+      title.textContent = school.name || 'Unnamed School';
+      card.appendChild(title);
+
+      const about = document.createElement('p');
+      about.innerHTML = `<strong>About:</strong> ${school.About || 'N/A'}`;
+      card.appendChild(about);
+
+      const accred = document.createElement('p');
+      accred.innerHTML = `<strong>Accreditation & Ranking:</strong> ${school.accreditation || 'N/A'}`;
+      card.appendChild(accred);
+
+      const schol = document.createElement('p');
+      const scholText = school.scholarships === 'yes' ? 'Yes' : (school.scholarships === 'no' ? 'No' : 'N/A');
+      schol.innerHTML = `<strong>Scholarships Available:</strong> ${scholText}`;
+      card.appendChild(schol);
+
+      const visa = document.createElement('p');
+      const visaText = school.visaSupport === 'yes' ? 'Yes' : (school.visaSupport === 'no' ? 'No' : 'N/A');
+      visa.innerHTML = `<strong>Visa Support:</strong> ${visaText}`;
+      card.appendChild(visa);
+
+      // buttons
+const actions = document.createElement('div');
+actions.className = 'school-actions';
+
+const readBtn = document.createElement('button');
+readBtn.className = 'action-btn read-more';
+readBtn.onclick = () => {
+  window.location.href = 'read-more.html?city=' + encodeURIComponent(cityName) + '&index=' + index;
+};
+readBtn.textContent = 'Read More';
+actions.appendChild(readBtn);
+
+const prayerBtn = document.createElement('button');
+prayerBtn.className = 'action-btn prayer';
+prayerBtn.onclick = () => { 
+  window.location.href = 'adopt-prayer.html?city=' + encodeURIComponent(cityName) + '&index=' + index; 
+};
+prayerBtn.textContent = 'Adopt for Prayer';
+actions.appendChild(prayerBtn);
+
+const revivalBtn = document.createElement('button');
+revivalBtn.className = 'action-btn revival';
+revivalBtn.onclick = () => { 
+  window.location.href = 'adopt-revival.html?city=' + encodeURIComponent(cityName) + '&index=' + index; 
+};
+revivalBtn.textContent = 'Adopt for Revival';
+actions.appendChild(revivalBtn);
+
+
+card.appendChild(actions);
+panelContent.appendChild(card);
+
+
+      // Show the panel
+      const panel = document.getElementById('side-panel');
+      panel.classList.add('active');
+      panel.setAttribute('aria-hidden', 'false');
     }
 
     function closePanel() {
-      document.getElementById('side-panel').classList.remove('active');
+      const panel = document.getElementById('side-panel');
+      panel.classList.remove('active');
+      panel.setAttribute('aria-hidden', 'true');
     }
 
-    // Event listeners
+    // Close with Escape key (nice to have)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePanel();
     });
 
+    // If you want clicking outside the panel to close it (optional)
     document.addEventListener('click', (e) => {
       const panel = document.getElementById('side-panel');
-      if (panel.classList.contains('active') && !panel.contains(e.target)) {
+      if (!panel.classList.contains('active')) return;
+      const inside = panel.contains(e.target);
+      const isPopupButton = e.target.closest('.leaflet-popup');
+      // If click is outside the side panel and not inside a popup, close panel
+      if (!inside && !isPopupButton) {
         closePanel();
       }
     });
-
-    // START
-    window.addEventListener('load', initMap);
   </script>
 </body>
 </html>
