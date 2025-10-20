@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('./models/user');
-const School = require('./models/school');
+const User = require('./models/User');
+const School = require('./models/School');
 
 const schools = [
   { name: "University of London", lat: 51.5074, lng: -0.1278, address: "London, UK", description: "Leading UK university" },
@@ -16,7 +16,7 @@ const schools = [
 
 async function seed() {
   try {
-    console.log('🌱 Seeding database...');
+    console.log('🌱 Seeding Campus Revival Movement database...');
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 
@@ -24,6 +24,7 @@ async function seed() {
     await School.deleteMany({});
     console.log('🗑️  Cleared existing data');
 
+    // CREATE 4 USERS (UPDATED!)
     const admin = await User.create({
       email: 'admin@crm.org',
       password: 'admin123',
@@ -32,26 +33,51 @@ async function seed() {
     });
     console.log('👤 Created admin user');
 
-    const user = await User.create({
+    const user1 = await User.create({
       email: 'john@example.com',
       password: 'password123',
       name: 'John Doe',
       role: 'adopter'
     });
-    console.log('👤 Created test user');
+    console.log('👤 Created test user 1');
 
+    const user2 = await User.create({
+      email: 'sarah@example.com',
+      password: 'password123',
+      name: 'Sarah Smith',
+      role: 'adopter'
+    });
+    console.log('👤 Created test user 2');
+
+    const user3 = await User.create({
+      email: 'mike@example.com',
+      password: 'password123',
+      name: 'Mike Johnson',
+      role: 'adopter'
+    });
+    console.log('👤 Created test user 3');
+
+    // CREATE SCHOOLS
     await School.insertMany(schools);
     console.log(`🏫 Created ${schools.length} schools`);
 
-    console.log('\n✅ Database seeded successfully!\n');
-    console.log('Login Credentials:');
-    console.log('==================');
-    console.log('Admin: admin@crm.org / admin123');
-    console.log('User:  john@example.com / password123\n');
+    console.log('\n✅ DATABASE SEEDED SUCCESSFULLY!');
+    console.log('═══════════════════════════════════════');
+    console.log('🚀 LOGIN CREDENTIALS:');
+    console.log('═══════════════════════════════════════');
+    console.log('👑 ADMIN:        admin@crm.org / admin123');
+    console.log('🙏 USER 1 (John): john@example.com / password123');
+    console.log('🙏 USER 2 (Sarah):sarah@example.com / password123');
+    console.log('🙏 USER 3 (Mike): mike@example.com / password123');
+    console.log('═══════════════════════════════════════');
+    console.log(`🏫 TOTAL SCHOOLS: ${schools.length}`);
+    console.log(`👥 TOTAL USERS: 4`);
+    console.log('\n🌐 TEST API: http://localhost:5000/api/schools');
+    console.log('🔐 TEST LOGIN: http://localhost:5000/api/login\n');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Seed error:', error);
+    console.error('❌ SEED ERROR:', error.message);
     process.exit(1);
   }
 }
